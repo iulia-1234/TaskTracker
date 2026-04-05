@@ -60,18 +60,14 @@ public class TaskServiceImplementation implements TaskService {
     }
 
     @Override
-    public List<TaskResponseDto> getTasks(Long id, TaskStatus status, TaskPriority priority) {
-
+    public List<TaskResponseDto> getTasks(TaskStatus status, TaskPriority priority) {
         Specification<Task> specification = Specification
-                .where(TaskSpecifications.hasUserId(id))
-                .and(TaskSpecifications.hasStatus(status))
+                .where(TaskSpecifications.hasStatus(status))
                 .and(TaskSpecifications.hasPriority(priority));
-
         List<Task> tasks = taskRepository.findAll(
                 specification,
                 Sort.by("dueDate").ascending()
         );
-
         return tasks.stream()
                 .map(this::toDto)
                 .toList();
