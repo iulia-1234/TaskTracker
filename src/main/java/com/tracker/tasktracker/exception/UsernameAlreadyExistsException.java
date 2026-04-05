@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 public class UsernameAlreadyExistsException extends ApiException {
 
     public UsernameAlreadyExistsException(String username) {
-        super("Username " + username + " is already taken");
+        super("Username " + username + " already exists");
     }
 
     @Override

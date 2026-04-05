@@ -7,12 +7,13 @@ import com.tracker.tasktracker.enums.TaskPriority;
 import com.tracker.tasktracker.enums.TaskStatus;
 import com.tracker.tasktracker.service.TaskService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("api/tasks")
+@RequestMapping("/api/tasks")
 public class TaskController {
     TaskService taskService;
 
@@ -21,17 +22,17 @@ public class TaskController {
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public TaskResponseDto createTask(@Valid @RequestBody TaskRequestCreateDto taskRequestCreateDto) {
         return taskService.createTask(taskRequestCreateDto);
     }
 
     @GetMapping
     public List<TaskResponseDto> getTasks(
-            @RequestParam(required = false) Long userId,
             @RequestParam(required = false) TaskStatus status,
             @RequestParam(required = false)TaskPriority priority
             ) {
-        return taskService.getTasks(userId, status, priority);
+        return taskService.getTasks(status, priority);
     }
 
     @GetMapping("/{id}")
@@ -45,6 +46,7 @@ public class TaskController {
     }
 
     @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteTask(@PathVariable Long id) {
         taskService.deleteTask(id);
     }
