@@ -5,15 +5,13 @@ import com.tracker.tasktracker.enums.TaskStatus;
 
 import java.time.LocalDateTime;
 
-public record TaskResponseDto(
+public record TaskSummaryDto(
         Long id,
         String title,
         String description,
         TaskPriority priority,
         TaskStatus status,
         LocalDateTime dueDate,
-        Long userId,
-        String username,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {

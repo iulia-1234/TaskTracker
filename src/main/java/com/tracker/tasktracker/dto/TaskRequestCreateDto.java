@@ -18,6 +18,9 @@ public record TaskRequestCreateDto(
         @NotNull
         TaskStatus status,
 
-        LocalDateTime dueDate
+        LocalDateTime dueDate,
+
+        @NotNull
+        Long userId
 ) {
 }

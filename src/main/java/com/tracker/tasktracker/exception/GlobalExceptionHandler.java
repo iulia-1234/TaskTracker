@@ -2,6 +2,7 @@ package com.tracker.tasktracker.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingPathVariableException;
@@ -73,6 +74,81 @@ public class GlobalExceptionHandler {
                         message,
                         formatErrorCode(exception)
                 ));
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleEnumsFromHttpMessageNotReadableException(HttpMessageNotReadableException exception) {
+        Throwable cause = exception.getMostSpecificCause();
+        String message = "Malformed JSON request";
+        if (cause != null && cause.getClass().getSimpleName().equals("InvalidFormatException")) {
+            try {
+                Object value = cause.getClass().getMethod("getValue").invoke(cause);
+                String field = "unknown";
+                try {
+                    Object pathList = cause.getClass().getMethod("getPath").invoke(cause);
+                    if (pathList instanceof java.util.List<?> path && !path.isEmpty()) {
+                        Object firstRef = path.getFirst();
+                        try {
+                            field = (String) firstRef.getClass().getMethod("getFieldName").invoke(firstRef);
+                        } catch (Exception ignored) {}
+                    }
+                } catch (Exception ignored) {}
+                if ("unknown".equals(field)) {
+                    String msg = cause.getMessage();
+                    if (msg != null && msg.contains("[\"")) {
+                        int start = msg.indexOf("[\"") + 2;
+                        int end = msg.indexOf("\"]", start);
+                        if (start >= 2 && end > start) {
+                            field = msg.substring(start, end);
+                        }
+                    }
+                }
+                message = String.format("Invalid value '%s' for field '%s'", value, field);
+            } catch (Exception ignored) {
+                message = cause.getMessage();
+            }
+        } else if (cause != null && cause.getClass().getSimpleName().equals("DateTimeParseException")) {
+            try {
+                Object value = cause.getClass().getMethod("getParsedString").invoke(cause);
+                String field = "unknown";
+                Throwable parent = exception.getCause();
+                while (parent != null) {
+                    if (parent.getClass().getSimpleName().equals("JsonMappingException")) {
+                        try {
+                            Object pathList = parent.getClass().getMethod("getPath").invoke(parent);
+                            if (pathList instanceof java.util.List<?> path && !path.isEmpty()) {
+                                Object firstRef = path.getFirst();
+                                try {
+                                    field = (String) firstRef.getClass().getMethod("getFieldName").invoke(firstRef);
+                                } catch (Exception ignored) {}
+                            }
+                        } catch (Exception ignored) {}
+                        break;
+                    }
+                    parent = parent.getCause();
+                }
+                if ("unknown".equals(field)) {
+                    message = String.format(
+                            "Invalid date value '%s'. Expected format: yyyy-MM-dd'T'HH:mm:ss",
+                            value
+                    );
+                } else {
+                    message = String.format(
+                            "Invalid date value '%s' for field '%s'. Expected format: yyyy-MM-dd'T'HH:mm:ss",
+                            value,
+                            field
+                    );
+                }
+
+            } catch (Exception ignored) {
+                message = cause.getMessage();
+            }
+        } else if (cause != null) {
+            message = cause.getMessage();
+        }
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(message, formatErrorCode(exception)));
     }
 
     @ExceptionHandler(Exception.class)
