@@ -10,6 +10,7 @@ public record TaskRequestUpdateDto(
         String description,
         TaskPriority priority,
         TaskStatus status,
-        LocalDateTime dueDate
+        LocalDateTime dueDate,
+        Long userId
 ) {
 }

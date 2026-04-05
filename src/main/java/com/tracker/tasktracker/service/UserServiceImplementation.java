@@ -1,8 +1,10 @@
 package com.tracker.tasktracker.service;
 
+import com.tracker.tasktracker.dto.TaskSummaryDto;
 import com.tracker.tasktracker.dto.UserRequestCreateDto;
 import com.tracker.tasktracker.dto.UserRequestUpdateDto;
 import com.tracker.tasktracker.dto.UserResponseDto;
+import com.tracker.tasktracker.entity.Task;
 import com.tracker.tasktracker.entity.User;
 import com.tracker.tasktracker.exception.EmailAlreadyExistsException;
 import com.tracker.tasktracker.exception.UserNotFoundException;
@@ -22,11 +24,30 @@ public class UserServiceImplementation implements UserService {
         this.userRepository = userRepository;
     }
 
+    private TaskSummaryDto toTaskSummaryDto(Task task) {
+        return new TaskSummaryDto(
+                task.getId(),
+                task.getTitle(),
+                task.getDescription(),
+                task.getPriority(),
+                task.getStatus(),
+                task.getDueDate(),
+                task.getCreatedAt(),
+                task.getUpdatedAt()
+        );
+    }
+
     private UserResponseDto toDto(User user) {
+        List<TaskSummaryDto> tasks = user.getTasks() == null
+                ? List.of()
+                : user.getTasks().stream()
+                .map(this::toTaskSummaryDto)
+                .toList();
         return new UserResponseDto(
                 user.getId(),
                 user.getUsername(),
-                user.getEmail()
+                user.getEmail(),
+                tasks
         );
     }
 
@@ -42,8 +63,7 @@ public class UserServiceImplementation implements UserService {
         User user = new User();
         user.setUsername(userRequestCreateDto.username());
         user.setEmail(userRequestCreateDto.email());
-        User savedUser = userRepository.save(user);
-        return toDto(savedUser);
+        return toDto(userRepository.save(user));
     }
 
     @Override

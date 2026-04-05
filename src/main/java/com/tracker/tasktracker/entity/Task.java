@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -16,17 +18,14 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class Task {
 
-    // ===== ID =====
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // ===== Core fields =====
     @Column(nullable = false)
     private String title;
     private String description;
 
-    // ===== Enums =====
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TaskPriority priority;
@@ -35,24 +34,15 @@ public class Task {
     @Column(nullable = false)
     private TaskStatus status;
 
-    // ===== Timestamps =====
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
     private LocalDateTime dueDate;
 
-    // ===== Relationships =====
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
-    // ===== Lifecycle hooks =====
-    @PrePersist
-    public void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
+    @CreationTimestamp
+    private LocalDateTime createdAt;
 
-    @PreUpdate
-    public void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 }
