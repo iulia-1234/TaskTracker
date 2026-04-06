@@ -46,6 +46,7 @@ public class UserControllerIT {
     @BeforeEach
     void setUp() {
         userRepository.deleteAll();
+        taskRepository.deleteAll();
     }
 
     @Test
@@ -100,7 +101,10 @@ public class UserControllerIT {
         userRepository.save(user);
         mockMvc.perform(get("/api/users"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)));
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].id").exists())
+                .andExpect(jsonPath("$[0].username").value(user.getUsername()))
+                .andExpect(jsonPath("$[0].email").value(user.getEmail()));
     }
 
     @Test

@@ -13,10 +13,10 @@ public record TaskRequestCreateDto(
         String description,
 
         @NotNull
-        TaskPriority priority,
+        TaskStatus status,
 
         @NotNull
-        TaskStatus status,
+        TaskPriority priority,
 
         LocalDateTime dueDate,
 

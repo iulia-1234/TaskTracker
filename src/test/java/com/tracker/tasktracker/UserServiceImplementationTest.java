@@ -55,7 +55,6 @@ public class UserServiceImplementationTest {
                 null,
                 null
         );
-
         userRequestCreateDto = new UserRequestCreateDto(
                 "Jane",
                 "jane@test.com"
@@ -123,6 +122,7 @@ public class UserServiceImplementationTest {
         assertEquals(user.getId(), userResponseDto.id());
         assertEquals(user.getUsername(), userResponseDto.username());
         assertEquals(user.getEmail(), userResponseDto.email());
+        verify(userRepository).findById(user.getId());
     }
 
     @Test
