@@ -8,8 +8,8 @@ import java.time.LocalDateTime;
 public record TaskRequestUpdateDto(
         String title,
         String description,
-        TaskPriority priority,
         TaskStatus status,
+        TaskPriority priority,
         LocalDateTime dueDate,
         Long userId
 ) {
